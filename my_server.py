@@ -3,7 +3,8 @@ import socket
 import sqlite3 as sql
 from time import time
 import _thread
-
+def calc_in_grid(num_to_round, grid_size):
+    return round(num_to_round/grid_size)*grid_size
 
 def main(conn,adrr):
     while 1:
@@ -68,11 +69,35 @@ def main(conn,adrr):
                 if public_username_available == None and username_available == None:
                         add_new_user = f"INSERT INTO Snake VALUES ('{username}','{password}','{public_username}','{highscore}')"
                         cur.execute(add_new_user)
+                        
+                        size = 35
+                        win_x = calc_in_grid(1000,size)
+                        win_y = calc_in_grid(800,size)
+                        print(win_x/2, win_y/2, win_x, win_y)
+                        starting_x = calc_in_grid(win_x/2,size)
+                        starting_y = calc_in_grid(win_y/2,size)
+                        print(starting_x, starting_y)
+                        length = 6
+                        head_colour_rgb = [0, 0, 255]
+                        snake_colour_1_rgb = [0, 255, 0]
+                        snake_colour_2_rgb = [0,150,0]
+                        head_colour_hex = "#0000ff"
+                        snake_colour_1_hex = "#00ff00"
+                        snake_colour_2_hex = "#009600"
+                        speed = 8
+                        if_hex = False
+                        write_default_settings = f"""INSERT INTO Settings VALUES ('{username}', '{win_x}', '{win_y}', '{starting_x}', '{starting_y}', '{size}', '{length}', 
+                        '{head_colour_rgb}', '{snake_colour_1_rgb}', '{snake_colour_2_rgb}', '{head_colour_rgb}', '{snake_colour_1_rgb}', '{snake_colour_2_rgb}', 
+                        '{head_colour_hex}', '{snake_colour_1_hex}', '{snake_colour_2_hex}', '{speed}', '{if_hex}')"""
+                        cur.execute(write_default_settings)
+                        con.commit()
+                        con.close()
                         conn.sendall(b"created_user")
+                
                 else: conn.sendall(f"invaild_valid {username_good_bad} {p_username_good_bad}".encode("utf-8"))
-
-                con.commit()
-                con.close()             #added sepernt command for inserting into the database
+                        
+                # con.commit()
+                # con.close()             #added sepernt command for inserting into the database
 
             elif command == "sync":
                 conn.sendto(b"sync",addr)
@@ -83,6 +108,17 @@ def main(conn,adrr):
                             conn.shutdown(socket.SHUT_WR)
                             break
                         conn.sendto(f_reading,addr)
+            # elif command == "update_highscore":
+            #     username = data_split[1]
+            #     highscore = data_split[2]
+            #     print(username, highscore)
+            #     con = sql.connect("Snake.sqlite3")
+            #     cur = con.cursor()
+            #     update_highscore = f"UPDATE Snake SET highscore = '{highscore}' WHERE username = '{username}'"
+            #     cur.execute(update_highscore)
+            #     con.commit()
+            #     con.close()
+
 
 
             elif command == "hello":
