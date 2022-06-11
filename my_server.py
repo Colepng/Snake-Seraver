@@ -1,3 +1,4 @@
+import pickle
 import socket
 
 import sqlite3 as sql
@@ -11,7 +12,6 @@ def main(conn,adrr):
         data = conn.recv(1024)
 
         if data != None or data != b'':
-            # print(data)
             data_decoded = data.decode()
             data_split = data_decoded.split(" ")
             command = data_split[0]
@@ -108,16 +108,62 @@ def main(conn,adrr):
                             conn.shutdown(socket.SHUT_WR)
                             break
                         conn.sendto(f_reading,addr)
-            # elif command == "update_highscore":
-            #     username = data_split[1]
-            #     highscore = data_split[2]
-            #     print(username, highscore)
-            #     con = sql.connect("Snake.sqlite3")
-            #     cur = con.cursor()
-            #     update_highscore = f"UPDATE Snake SET highscore = '{highscore}' WHERE username = '{username}'"
-            #     cur.execute(update_highscore)
-            #     con.commit()
-            #     con.close()
+                    print("test")
+                    
+            elif command == "sync_settings":
+                while 1:
+                    print("test")
+                    data2 = conn.recv(1024)
+                    if data2 != None or data2 != b'':
+                        settings = pickle.loads(data2)
+                        print(settings)
+                        break     
+                username = data_split[1]
+                win_x = settings["win_x"]
+                win_y = settings["win_y"]
+                starting_x = settings["starting_x"]
+                starting_y = settings["starting_y"]
+                size = settings["size"]
+                length = settings["length"]
+                head_colour = settings["head_colour"]
+                snake_colour_1 = settings["snake_colour_1"]
+                snake_colour_2 = settings["snake_colour_2"]
+                head_colour_rgb = settings["head_colour_rgb"]
+                snake_colour_1_rgb = settings["snake_colour_1_rgb"]
+                snake_colour_2_rgb = settings["snake_colour_2_rgb"]
+                head_colour_hex = settings["head_colour_hex"]
+                snake_colour_1_hex = settings["snake_colour_1_hex"]
+                snake_colour_2_hex = settings["snake_colour_2_hex"]
+                speed = settings["speed"]
+                if_hex = settings["if_hex"]
+                con = sql.connect("Snake.sqlite3")
+                cur = con.cursor()
+                update_settings = f"""UPDATE Settings SET win_x = '{win_x}', win_y = '{win_y}', starting_x = '{starting_x}', starting_y = '{starting_y}', size = '{size}', length = '{length}', 
+                head_colour = '{head_colour}', snake_colour_1 = '{snake_colour_1}', snake_colour_2 = '{snake_colour_2}',
+                head_colour_rgb = '{head_colour_rgb}', snake_colour_1_rgb = '{snake_colour_1_rgb}', snake_colour_2_rgb = '{snake_colour_2_rgb}',
+                head_colour_hex = '{head_colour_hex}', snake_colour_1_hex = '{snake_colour_1_hex}', snake_colour_2_hex = '{snake_colour_2_hex}',
+                speed = '{speed}', if_hex = '{if_hex}' WHERE username = '{username}';""" #update settings
+                #print(speed)
+                cur.execute(update_settings)
+                print(speed)
+                con.commit()
+                con.close()
+                print(speed)
+
+                    
+
+            elif command == "update_highscore":
+                username = data_split[1]
+                highscore = data_split[2]
+                
+                print(username, highscore)
+                con = sql.connect("Snake.sqlite3")
+                cur = con.cursor()
+                update_highscore = f"UPDATE Snake SET highscore = '{highscore}' WHERE username = '{username}'"
+                cur.execute(update_highscore)
+                con.commit()
+                con.close()
+                conn.sendto(b"updated_highscore",addr)
 
 
 
