@@ -118,6 +118,8 @@ def main(conn,adrr):
                         settings = pickle.loads(data2)
                         print(settings)
                         break     
+                con = sql.connect("Snake.sqlite3")
+                cur = con.cursor()
                 username = data_split[1]
                 win_x = settings["win_x"]
                 win_y = settings["win_y"]
@@ -145,10 +147,8 @@ def main(conn,adrr):
                 speed = '{speed}', if_hex = '{if_hex}' WHERE username = '{username}';""" #update settings
                 #print(speed)
                 cur.execute(update_settings)
-                print(speed)
                 con.commit()
                 con.close()
-                print(speed)
 
                     
 
