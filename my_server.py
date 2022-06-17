@@ -12,7 +12,7 @@ def main(conn,adrr):
         data = conn.recv(1024)
 
         if data != None or data != b'':
-            data_decoded = data.decode()
+            data_decoded = data.decode('utf-16')
             data_split = data_decoded.split(" ")
             command = data_split[0]
             
@@ -108,11 +108,14 @@ def main(conn,adrr):
                             conn.shutdown(socket.SHUT_WR)
                             break
                         conn.sendto(f_reading,addr)
-                    print("test")
+                    print("exited sync")
                     
             elif command == "sync_settings":
                 while 1:
-                    print("test")
+                    #print("in sync_settings")
+                    
+                    #print(data2)
+                    conn.sendto(b"ready",addr)
                     data2 = conn.recv(1024)
                     if data2 != None or data2 != b'':
                         settings = pickle.loads(data2)
@@ -145,9 +148,11 @@ def main(conn,adrr):
                 head_colour_rgb = '{head_colour_rgb}', snake_colour_1_rgb = '{snake_colour_1_rgb}', snake_colour_2_rgb = '{snake_colour_2_rgb}',
                 head_colour_hex = '{head_colour_hex}', snake_colour_1_hex = '{snake_colour_1_hex}', snake_colour_2_hex = '{snake_colour_2_hex}',
                 speed = '{speed}', if_hex = '{if_hex}' WHERE username = '{username}';""" #update settings
-                #print(speed)
+                print(speed)
                 cur.execute(update_settings)
                 con.commit()
+                cur.execute(f"SELECT speed FROM Settings WHERE username = '{username}'")
+                print(cur.fetchone())
                 con.close()
 
                     
